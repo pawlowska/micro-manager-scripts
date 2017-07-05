@@ -1,0 +1,57 @@
+//for mm2
+
+import org.micromanager.data;
+import org.micromanager.PositionList;
+import org.micromanager.StagePosition;
+import org.micromanager.MultiStagePosition;
+import org.micromanager.PositionListManager;
+
+//// KONFIGURACJA ////
+
+//number of steps
+int nx=2;
+int ny=2;
+//starting point [um]
+double x0=10000;
+double y0=10000;
+//step (tile size) [um]
+double xS=-2500;
+double yS=2500;
+/////////
+
+mm.scripter().clearMessageWindow();
+xyStage = mmc.getXYStageDevice();
+mm.scripter().message(xyStage);
+
+int n= nx*ny;
+
+PositionList pl = new PositionList();
+
+//define function to add single position
+addPosition(x, y, label) {
+	StagePosition sp = new StagePosition();
+	sp.numAxes = 2;
+   sp.x = x;
+   sp.y = y;
+   sp.stageName = xyStage;
+   MultiStagePosition msp = new MultiStagePosition();
+   msp.add(sp);
+   msp.setLabel(label);
+	pl.addPosition(msp);
+}
+
+// add all positions in a loop
+for (i=0; i<nx; i++) {
+    for (j=0; j<ny; j++) {
+    		ind=j+ny*i;
+    		if (ind<10) //this is for 0-padding index string
+    			s="0"+ind;
+    		else
+    			s=""+ind;
+   		addPosition(x0+i*xS, y0+j*yS, "Pos"+s);
+    }
+}   
+
+mm.positions().setPositionList( pl );
+
+print("Number of positions in list "+pl.getNumberOfPositions());
