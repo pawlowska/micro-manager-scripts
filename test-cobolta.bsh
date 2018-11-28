@@ -1,0 +1,5 @@
+laser="Cobolt";
+mmc.setProperty(laser, "Laser", "On");
+mmc.sleep(3000);
+power = mmc.getProperty(laser, "PowerSetpoint");
+print("power "+power); 
