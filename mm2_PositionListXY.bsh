@@ -10,14 +10,17 @@ import org.micromanager.PositionListManager;
 
 //number of steps
 int nx=2;
-int ny=2;
+int ny=6;
 //starting point [um]
-double x0=10000;
-double y0=10000;
+double x0=18350;
+double y0=6300;
 //step (tile size) [um]
-double xS=-2500;
-double yS=2500;
-/////////
+//08.2018 settings: signal x=-1600/y=1800 autofluo x=-2300/y=2500 >MS - to wpisaæ xS yS
+//ROI signal -1690/1890 autofluo -2410/2630 
+double xS=-2650;
+double yS=2700;
+///////// dodaj jedn¹ pozycjê na koñcu:
+boolean add_one=true; //opcje: true/false
 
 mm.scripter().clearMessageWindow();
 xyStage = mmc.getXYStageDevice();
@@ -40,17 +43,27 @@ addPosition(x, y, label) {
 	pl.addPosition(msp);
 }
 
+padding(ind) {
+	if (ind<10) //this is for 0-padding index string
+    			s="0"+ind;
+    		else
+    			s=""+ind;
+   return s;
+}
+
 // add all positions in a loop
 for (i=0; i<nx; i++) {
     for (j=0; j<ny; j++) {
     		ind=j+ny*i;
-    		if (ind<10) //this is for 0-padding index string
-    			s="0"+ind;
-    		else
-    			s=""+ind;
+    		s=padding(ind);
    		addPosition(x0+i*xS, y0+j*yS, "Pos"+s);
     }
-}   
+}
+
+if (add_one) {
+   	s=padding(nx*ny);
+   	addPosition(x0, y0, "Pos"+s);
+}
 
 mm.positions().setPositionList( pl );
 

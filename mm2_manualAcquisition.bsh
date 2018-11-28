@@ -1,0 +1,89 @@
+import ij.gui.GenericDialog;
+
+mm.acquisitions().clearRunnables();
+
+///////////////////////   definicje
+laser488="Luxx-488"; //blue
+laser561="Cobolt";   //yellow
+laser638="Luxx-638"; //red
+
+///////////////////////   KONFIGURACJA:
+
+ile_prawa =12;
+ile_lewa =0;
+
+laser = laser488; //do wyboru: laser488, laser561, laser638
+
+//////////////////////     KONIEC
+
+runnable = new Runnable() {
+   int count = 0;
+
+	public void laserOn() {
+		if (laser==laser561) {
+			mmc.setProperty(laser, "Laser", "On");
+			mmc.sleep(3000);
+			power = mmc.getProperty(laser, "PowerSetpoint");
+		} else {
+			mmc.setProperty(laser, "Laser Operation Select", "On");
+			power = mmc.getProperty(laser, "Laser Power Set-point Select [mW]");
+		};
+		print("laser ON, power "+power); 
+	};
+
+	public void laserOff() {
+		if (laser==laser561) {
+			mmc.setProperty(laser, "Laser", "Off");		
+		} else {
+			mmc.setProperty(laser, "Laser Operation Select", "Off");
+		};
+		print("laser OFF");
+	};
+   
+   public void run() {
+
+
+      if (count==0) { //1st position: open right arm, start laser
+	     // show message and wait for response
+   	   GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
+      	if (ile_prawa>0) {
+      		dlg.addMessage("Starting acquisition. Open RIGHT illumination");
+      	} else {
+      		dlg.addMessage("Starting acquisition. Open LEFT illumination");
+      	}
+	      dlg.showDialog();
+			//laser ON and print power
+     		laserOn();
+     	} else if (count==ile_prawa+ile_lewa) { //end of both illuminations: switch laser off
+			laserOff();
+			print("Finished, laser off");
+
+			GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
+      	dlg.addMessage("Acquisition finished, block both beams");
+      	dlg.showDialog();
+		} else if (count==ile_prawa) { //end of right illumination: change illumination
+      	laserOff();
+			
+			GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
+      	dlg.addMessage(count+" positions done. Open LEFT illumination");
+      	dlg.showDialog();
+      	print("Illumination changed");
+      	
+			//laser ON and print power
+			laserOn();
+		
+      } else {
+      	mmc.sleep(2000);
+       	mm.scripter().message("Waited 2 seconds, nr: " + count);
+      };
+      
+      count++;
+      print(count);
+
+   }
+};
+
+// Run the runnable on all frames and positions,
+// -1 --> attach to all planes along given dimension
+
+mm.acquisitions().attachRunnable(-1, -1, 0, 0, runnable); // f, p, c, s 
