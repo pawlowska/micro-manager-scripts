@@ -12,15 +12,15 @@ import org.micromanager.PositionListManager;
 int nx=2;
 int ny=6;
 //starting point [um]
-double x0=18350;
-double y0=6300;
-//step (tile size) [um]
-//08.2018 settings: signal x=-1600/y=1800 autofluo x=-2300/y=2500 >MS - to wpisaæ xS yS
+double x0=18600;
+double y0=6200;
 //ROI signal -1690/1890 autofluo -2410/2630 
-double xS=-2650;
-double yS=2700;
+//step (tile size) [um] 
+//08.2018 settings: signal x=-1600/y=1800 autofluo x=-2300/y=2500 >MS - to wpisaæ xS yS
+double xS=-2800;
+double yS=2800;
 ///////// dodaj jedn¹ pozycjê na koñcu:
-boolean add_one=true; //opcje: true/false
+//boolean add_one=false; //opcje: true/false
 
 mm.scripter().clearMessageWindow();
 xyStage = mmc.getXYStageDevice();
@@ -52,18 +52,24 @@ padding(ind) {
 }
 
 // add all positions in a loop
-for (i=0; i<nx; i++) {
+for (k=0; k<nx; k++) {
     for (j=0; j<ny; j++) {
-    		ind=j+ny*i;
+    		ind=j+ny*k;
     		s=padding(ind);
-   		addPosition(x0+i*xS, y0+j*yS, "Pos"+s);
-    }
+   		addPosition(x0+k*xS, y0+j*yS, "Pos"+s);
+    };
 }
+x_last=x0+(nx-1)*xS;
+print("");
+print("Last x: "+x_last);
+y_last=y0+(ny-1)*yS;
+print("Last y: "+y_last);
 
-if (add_one) {
-   	s=padding(nx*ny);
-   	addPosition(x0, y0, "Pos"+s);
-}
+
+//if (add_one) {
+//   	s=padding(nx*ny);
+//   	addPosition(x0, y0, "Pos"+s);
+//}
 
 mm.positions().setPositionList( pl );
 

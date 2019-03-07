@@ -6,30 +6,35 @@ import org.micromanager.MultiStagePosition;
 import org.micromanager.StagePosition;
 import org.micromanager.PositionList;
 
-//Loads current window in Datastore
-Datastore store = mm.displays().getCurrentWindow().getDatastore();
-pth=store.getSavePath();
+extract_metadata_from_open() {
+	//Loads current window in Datastore
+	Datastore store = mm.displays().getCurrentWindow().getDatastore();
+	pth=store.getSavePath();
 
-//Extracts metadata and position list
-SummaryMetadata summary = store.getSummaryMetadata();
-MultiStagePosition[] mpos_list = summary.getStagePositions();
+	//Extracts metadata and position list
+	SummaryMetadata summary = store.getSummaryMetadata();
+	MultiStagePosition[] mpos_list = summary.getStagePositions();
 
-//coverts to PositionList class and saves
-int n=mpos_list.length;
-PositionList pl = new PositionList();
+	//coverts to PositionList class and saves
+	int n=mpos_list.length;
+	PositionList pl = new PositionList();
 
-for (i=0; i<n; i++) {
-		sp=mpos_list[i].get(0);
-		pl.addPosition(mpos_list[i]);
+	for (k=0; k<n; k++) {
+		sp=mpos_list[k].get(0);
+		pl.addPosition(mpos_list[k]);
+	}
+
+	pth_file=pth+"\\METADATA_xy_positions.txt";
+	pl.save(pth_file);
+	print("Saved to: "+pth_file);
+
+	z=summary.getZStepUm();
+	pth_z=pth+"\\METADATA_z.txt";
+	out = new PrintStream(new FileOutputStream(pth_z));
+	out.print(z);
+	out.close();
+	print("Saved to: "+pth_z);
 }
 
-pth_file=pth+"\\METADATA_xy_positions.txt";
-pl.save(pth_file);
-print("Saved to: "+pth_file);
 
-z=summary.getZStepUm();
-pth_z=pth+"\\METADATA_z.txt";
-out = new PrintStream(new FileOutputStream(pth_z));
-out.print(z);
-out.close();
-print("Saved to: "+pth_z);
+extract_metadata_from_open()
