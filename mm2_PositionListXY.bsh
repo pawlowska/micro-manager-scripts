@@ -4,7 +4,6 @@ import org.micromanager.data;
 import org.micromanager.PositionList;
 import org.micromanager.StagePosition;
 import org.micromanager.MultiStagePosition;
-import org.micromanager.PositionListManager;
 
 //// KONFIGURACJA ////
 
@@ -13,16 +12,14 @@ int nx=2;
 int ny=6;
 //starting point [um]
 double x0=18600;
-double y0=6200;
+double y0=6000;
 //ROI signal -1690/1890 autofluo -2410/2630 
 //step (tile size) [um] 
 //08.2018 settings: signal x=-1600/y=1800 autofluo x=-2300/y=2500 >MS - to wpisaæ xS yS
 double xS=-2800;
 double yS=2800;
-///////// dodaj jedn¹ pozycjê na koñcu:
-//boolean add_one=false; //opcje: true/false
 
-mm.scripter().clearMessageWindow();
+mm.getScriptController().clearMessageWindow();
 xyStage = mmc.getXYStageDevice();
 mm.scripter().message(xyStage);
 
@@ -65,11 +62,6 @@ print("Last x: "+x_last);
 y_last=y0+(ny-1)*yS;
 print("Last y: "+y_last);
 
-
-//if (add_one) {
-//   	s=padding(nx*ny);
-//   	addPosition(x0, y0, "Pos"+s);
-//}
 
 mm.positions().setPositionList( pl );
 
