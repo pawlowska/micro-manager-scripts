@@ -1,0 +1,125 @@
+import ij.gui.GenericDialog;
+import mmcorej.StrVector;
+import org.micromanager.MultiStagePosition;
+import org.micromanager.PositionList;
+
+mm.acquisitions().clearRunnables();
+mm.getScriptController().clearMessageWindow();
+
+///////////////////////   definicje
+laser488="Luxx-488"; //blue
+laser561="Cobolt";   //yellow
+laser638="Luxx-638"; //red
+
+///////////////////////   KONFIGURACJA:
+
+ile_prawa =1;
+ile_lewa =1;
+ile=ile_prawa+ile_lewa;
+
+laser = laser488; //do wyboru: laser488, laser561, laser638
+
+//////////////////////     KONIEC
+
+class LaserFunctions {
+	public void laserOn(laser) {
+	String power ="";
+	if (laser==laser561) {
+		mmc.setProperty(laser, "Laser", "On");
+		mmc.sleep(3000);
+		power = mmc.getProperty(laser, "PowerSetpoint");
+	} else {
+		mmc.setProperty(laser, "Laser Operation Select", "On");
+		StrVector properties = mmc.getDevicePropertyNames(laser);
+		String prop = properties.get(9);
+		power = mmc.getProperty(laser, prop);
+	};
+	print("laser "+laser +" ON, power "+power); 
+};
+
+
+	public void laserOff() {
+		property_name="";
+		if (laser==laser561) {property_name="Laser";}
+		else {property_name="Laser Operation Select";};
+		mmc.setProperty(laser, property_name, "Off");		
+		print("laser OFF");
+	}
+}
+
+starting = new Runnable() {
+	 public void run() {
+	 		GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
+			dlg.addMessage("Chosen laser: "+laser+". Did you change the filter?");
+			dlg.showDialog();
+			if (dlg.wasCanceled()) {
+				print("Aborting acquisition. Change the filter and restart.");
+				return;
+			}
+	 					
+			new LaserFunctions().laserOn(laser);
+      	
+      	if (ile_prawa>0) {
+      		mmc.setProperty("ShutterA_RIGHT", "State", "1"); // open
+				mmc.waitForDevice("ShutterA_RIGHT");
+      	} else {
+      		mmc.setProperty("ShutterD_LEFT", "State", "1"); // open
+				mmc.waitForDevice("ShutterD_LEFT");
+      	}
+	 }
+};
+
+
+runnable = new Runnable() {
+   int count = 0;
+
+   public void run() {
+      if (count==0) { //1st position: open  arm, start laser
+      	print("Starting acquisition");
+		} else if (count==ile_prawa) { //end of right illumination: change illumination
+			mmc.setProperty("ShutterA_RIGHT", "State", "0"); // close
+     		mmc.setProperty("ShutterD_LEFT", "State", "1"); // open
+			mmc.waitForDevice("ShutterD_LEFT");
+			
+      	print("Illumination changed");
+      } else {
+      	mmc.sleep(2000);
+       	print("Waited 2 seconds, next position: " + count);
+      };
+      count++;
+   }
+};
+
+
+//mm.acquisitions().getROI;
+PositionList pl = mm.positions().getPositionList() ;
+npos=pl.getNumberOfPositions();
+if (npos==ile) {
+	print("Number of tiles: "+npos);
+} else {
+	print("CHECK POSITIONS");
+	print(npos+" positions in the position list");
+	print(ile +" positions in this script");
+	print("Aborting acquisition");
+	return;
+}
+
+// Run the runnable on all frames and positions,
+// -1 --> attach to all planes along given dimension
+mm.acquisitions().attachRunnable(0, 0, 0, 0, starting); // f, p, c, s 
+mm.acquisitions().attachRunnable(-1, -1, 0, 0, runnable); // f, p, c, s 
+
+mm.acquisitions().runAcquisition();
+
+//turn off laser and display message
+new LaserFunctions().laserOff();
+
+MultiStagePosition msp=pl.getPosition(0);
+print("Going to: "+msp.getLabel());
+MultiStagePosition.goToPosition(msp, mmc);
+
+GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
+dlg.addMessage("Acquisition finished, laser is OFF");
+dlg.hideCancelButton();
+dlg.setOKLabel("Great, thanks!");
+dlg.showDialog();
