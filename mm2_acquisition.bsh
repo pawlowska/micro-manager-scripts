@@ -13,8 +13,8 @@ laser638="Luxx-638"; //red
 
 ///////////////////////   KONFIGURACJA:
 
-ile_prawa =1;
-ile_lewa =1;
+ile_prawa =2;
+ile_lewa =0;
 ile=ile_prawa+ile_lewa;
 
 laser = laser488; //do wyboru: laser488, laser561, laser638
@@ -54,6 +54,7 @@ starting = new Runnable() {
 			dlg.showDialog();
 			if (dlg.wasCanceled()) {
 				print("Aborting acquisition. Change the filter and restart.");
+				mm.acquisitions().haltAcquisition();
 				return;
 			}
 	 					
@@ -62,25 +63,45 @@ starting = new Runnable() {
       	if (ile_prawa>0) {
       		mmc.setProperty("ShutterA_RIGHT", "State", "1"); // open
 				mmc.waitForDevice("ShutterA_RIGHT");
+				print("Opening RIGHT shutter");
       	} else {
       		mmc.setProperty("ShutterD_LEFT", "State", "1"); // open
 				mmc.waitForDevice("ShutterD_LEFT");
+				print("Opening LEFT shutter");
       	}
 	 }
 };
 
+change_shutter = new Runnable() {
+	public void run() {
+		print("Running: change shutter");
+		mmc.setProperty("ShutterA_RIGHT", "State", "0"); // close
+		mmc.setProperty("ShutterD_LEFT", "State", "1"); // open
+		mmc.waitForDevice("ShutterD_LEFT");
+		print("Illumination changed");
+	}
+};
 
+waiting = new Runnable() {
+	public void run() {
+		mmc.sleep(2000);
+      print("Waited 2 seconds");
+	}
+};
+
+/*
 runnable = new Runnable() {
    int count = 0;
 
    public void run() {
+   	print(count);
       if (count==0) { //1st position: open  arm, start laser
       	print("Starting acquisition");
 		} else if (count==ile_prawa) { //end of right illumination: change illumination
 			mmc.setProperty("ShutterA_RIGHT", "State", "0"); // close
      		mmc.setProperty("ShutterD_LEFT", "State", "1"); // open
 			mmc.waitForDevice("ShutterD_LEFT");
-			
+			mmc.sleep(2000);
       	print("Illumination changed");
       } else {
       	mmc.sleep(2000);
@@ -89,7 +110,7 @@ runnable = new Runnable() {
       count++;
    }
 };
-
+*/
 
 //mm.acquisitions().getROI;
 PositionList pl = mm.positions().getPositionList() ;
@@ -97,17 +118,19 @@ npos=pl.getNumberOfPositions();
 if (npos==ile) {
 	print("Number of tiles: "+npos);
 } else {
-	print("CHECK POSITIONS");
+	print("CHECK POSITIONS!");
 	print(npos+" positions in the position list");
 	print(ile +" positions in this script");
 	print("Aborting acquisition");
 	return;
 }
 
-// Run the runnable on all frames and positions,
 // -1 --> attach to all planes along given dimension
+//mm.acquisitions().attachRunnable(0, -1, 0, 0, runnable); // f, p, c, s 
+
+mm.acquisitions().attachRunnable(0, -1, 0, 0, waiting); // f, p, c, s 
 mm.acquisitions().attachRunnable(0, 0, 0, 0, starting); // f, p, c, s 
-mm.acquisitions().attachRunnable(-1, -1, 0, 0, runnable); // f, p, c, s 
+mm.acquisitions().attachRunnable(0, ile_prawa, 0, 0, change_shutter); // f, p, c, s 
 
 mm.acquisitions().runAcquisition();
 
@@ -115,7 +138,7 @@ mm.acquisitions().runAcquisition();
 new LaserFunctions().laserOff();
 
 MultiStagePosition msp=pl.getPosition(0);
-print("Going to: "+msp.getLabel());
+print("Going back to "+msp.getLabel());
 MultiStagePosition.goToPosition(msp, mmc);
 
 GenericDialog dlg = new GenericDialog("Manual Acquisition", null);

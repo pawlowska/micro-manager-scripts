@@ -1,0 +1,6 @@
+//open both shutters
+
+mmc.setProperty("ShutterA_RIGHT", "State", "1"); // open
+mmc.waitForDevice("ShutterA_RIGHT");
+mmc.setProperty("ShutterD_LEFT", "State", "1"); // open
+mmc.waitForDevice("ShutterD_LEFT");
