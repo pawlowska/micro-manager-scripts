@@ -13,11 +13,11 @@ laser638="Luxx-638"; //red
 
 ///////////////////////   KONFIGURACJA:
 
-ile_prawa =2;
-ile_lewa =0;
+ile_prawa =10;
+ile_lewa =10;
 ile=ile_prawa+ile_lewa;
 
-laser = laser488; //do wyboru: laser488, laser561, laser638
+laser = laser638; //do wyboru: laser488, laser561, laser638
 
 //////////////////////     KONIEC
 
@@ -50,7 +50,7 @@ class LaserFunctions {
 starting = new Runnable() {
 	 public void run() {
 	 		GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
-			dlg.addMessage("Chosen laser: "+laser+". Did you change the filter?");
+			dlg.addMessage("Chosen laser: "+laser+". Did you change the filter? What about z?");
 			dlg.showDialog();
 			if (dlg.wasCanceled()) {
 				print("Aborting acquisition. Change the filter and restart.");
