@@ -13,8 +13,8 @@ laser638="Luxx-638"; //red
 
 ///////////////////////   KONFIGURACJA:
 
-ile_prawa =10;
-ile_lewa =10;
+ile_prawa =0;
+ile_lewa =7;
 ile=ile_prawa+ile_lewa;
 
 laser = laser638; //do wyboru: laser488, laser561, laser638
@@ -89,29 +89,6 @@ waiting = new Runnable() {
 	}
 };
 
-/*
-runnable = new Runnable() {
-   int count = 0;
-
-   public void run() {
-   	print(count);
-      if (count==0) { //1st position: open  arm, start laser
-      	print("Starting acquisition");
-		} else if (count==ile_prawa) { //end of right illumination: change illumination
-			mmc.setProperty("ShutterA_RIGHT", "State", "0"); // close
-     		mmc.setProperty("ShutterD_LEFT", "State", "1"); // open
-			mmc.waitForDevice("ShutterD_LEFT");
-			mmc.sleep(2000);
-      	print("Illumination changed");
-      } else {
-      	mmc.sleep(2000);
-       	print("Waited 2 seconds, next position: " + count);
-      };
-      count++;
-   }
-};
-*/
-
 //mm.acquisitions().getROI;
 PositionList pl = mm.positions().getPositionList() ;
 npos=pl.getNumberOfPositions();
@@ -126,7 +103,6 @@ if (npos==ile) {
 }
 
 // -1 --> attach to all planes along given dimension
-//mm.acquisitions().attachRunnable(0, -1, 0, 0, runnable); // f, p, c, s 
 
 mm.acquisitions().attachRunnable(0, -1, 0, 0, waiting); // f, p, c, s 
 mm.acquisitions().attachRunnable(0, 0, 0, 0, starting); // f, p, c, s 
