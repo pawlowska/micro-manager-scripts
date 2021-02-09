@@ -9,15 +9,15 @@ import org.micromanager.MultiStagePosition;
 
 //number of steps
 int nx=2;
-int ny=6;
+int ny=2;
 //starting point [um]
-double x0=18600;
-double y0=6000;
+double x0=16300;
+double y0=13200;
 //ROI signal -1690/1890 autofluo -2410/2630 
 //step (tile size) [um] 
 //08.2018 settings: signal x=-1600/y=1800 autofluo x=-2300/y=2500 >MS - to wpisaæ xS yS
-double xS=-2800;
-double yS=2800;
+double xS=-2300;
+double yS=2500;
 
 mm.getScriptController().clearMessageWindow();
 xyStage = mmc.getXYStageDevice();
