@@ -8,46 +8,57 @@ mm.getScriptController().clearMessageWindow();
 
 ///////////////////////   definicje
 laser488="Luxx-488"; //blue
-laser561="Cobolt";   //yellow
+laser561="Cobolt-561";   //yellow
 laser638="Luxx-638"; //red
 
 ///////////////////////   KONFIGURACJA:
 
-ile_prawa =0;
-ile_lewa =7;
+ile_prawa =2;
+ile_lewa =2;
 ile=ile_prawa+ile_lewa;
 
-laser = laser638; //do wyboru: laser488, laser561, laser638
+laser = laser561; //do wyboru: laser488, laser561, laser638
+power=20; //laser power in mW here
 
 //////////////////////     KONIEC
 
 class LaserFunctions {
-	public void laserOn(laser) {
-	String power ="";
+	public void laserOn(laser, power) {
+	print("Attempting to start "+laser);
+	StrVector properties = mmc.getDevicePropertyNames(laser);
+	i_power=-1;
+	i_status=-1;
 	if (laser==laser561) {
-		mmc.setProperty(laser, "Laser", "On");
+		i_power=29;
+		i_status=21;
+		mmc.setProperty(laser, properties.get(i_status), "On");
 		mmc.sleep(3000);
-		power = mmc.getProperty(laser, "PowerSetpoint");
+		
 	} else {
-		mmc.setProperty(laser, "Laser Operation Select", "On");
-		StrVector properties = mmc.getDevicePropertyNames(laser);
-		String prop = properties.get(9);
-		power = mmc.getProperty(laser, prop);
+		i_power=9;
+		i_status=5;
+		mmc.setProperty(laser, properties.get(i_status), "On");
 	};
-	print("laser "+laser +" ON, power "+power); 
+	mmc.setProperty(laser, properties.get(i_power), power);
+	status = mmc.getProperty(laser, properties.get(i_status));
+	print("laser status is "+status);
 };
 
 
 	public void laserOff() {
-		property_name="";
-		if (laser==laser561) {property_name="Laser";}
-		else {property_name="Laser Operation Select";};
-		mmc.setProperty(laser, property_name, "Off");		
-		print("laser OFF");
+		StrVector properties = mmc.getDevicePropertyNames(laser);
+		i_status=-1;
+		if (laser==laser561) {i_status=21;}
+		else {i_status=5;};
+		mmc.setProperty(laser, properties.get(i_status), "Off");		
+		print("laser status "+mmc.getProperty(laser, properties.get(i_status)));
 	}
 }
 
 starting = new Runnable() {
+/*	
+ * display messages and open correct shutter
+ */
 	 public void run() {
 	 		GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
 			dlg.addMessage("Chosen laser: "+laser+". Did you change the filter? What about z?");
@@ -58,7 +69,7 @@ starting = new Runnable() {
 				return;
 			}
 	 					
-			new LaserFunctions().laserOn(laser);
+			new LaserFunctions().laserOn(laser, power);
       	
       	if (ile_prawa>0) {
       		mmc.setProperty("ShutterA_RIGHT", "State", "1"); // open
@@ -84,16 +95,27 @@ change_shutter = new Runnable() {
 
 waiting = new Runnable() {
 	public void run() {
+		print("Waiting 2 seconds...");
 		mmc.sleep(2000);
-      print("Waited 2 seconds");
 	}
 };
+
+/////////////////////////////////////////////////////////////////////
 
 //mm.acquisitions().getROI;
 PositionList pl = mm.positions().getPositionList() ;
 npos=pl.getNumberOfPositions();
 if (npos==ile) {
 	print("Number of tiles: "+npos);
+} else if (ile==1) {
+	print("Single stack");
+	xyStage = mmc.getXYStageDevice();
+	zStage = mmc.getFocusDevice();
+	x=mmc.getXPosition(xyStage);
+	y=mmc.getYPosition(xyStage);
+	z=mmc.getPosition(zStage);
+	MultiStagePosition msp = new MultiStagePosition(xyStage, x, y, zStage, z);
+	pl.addPosition(msp);
 } else {
 	print("CHECK POSITIONS!");
 	print(npos+" positions in the position list");
