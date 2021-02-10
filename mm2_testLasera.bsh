@@ -1,0 +1,38 @@
+import ij.gui.GenericDialog;
+import mmcorej.StrVector;
+
+///////////////////////   definicje
+laser488="Luxx-488"; //blue
+laser561="Cobolt-561";   //yellow
+laser638="Luxx-638"; //red
+/////////////////////// 
+
+StrVector devcs = mmc.getLoadedDevices(); 
+for (int i=0; i<devcs.size(); i++) {
+String prop = devcs.get(i);
+	print("Name: " + prop );
+}
+StrVector properties = mmc.getDevicePropertyNames(laser488);
+for (int i=0; i<properties.size(); i++) {
+String prop = properties.get(i);
+String val = mmc.getProperty(laser488, prop);
+print("Name: " + prop + ", value: " + val);
+
+
+}
+String prop = properties.get(9);
+String val = mmc.getProperty(laser488, prop);
+print("Name: " + prop + ", value: " + val);
+
+
+/*
+print("starting status "+mmc.getProperty(laser, properties.get(21)));
+mmc.setProperty(laser, properties.get(29), "20");
+mmc.setProperty(laser, properties.get(21), "On");
+
+mmc.sleep(3000);
+print(mmc.getProperty(laser, properties.get(21)));
+power = mmc.getProperty(laser, "Power");
+print("power "+power); 
+mmc.setProperty(laser, properties.get(21), "Off");
+*/
