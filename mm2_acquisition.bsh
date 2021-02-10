@@ -13,12 +13,14 @@ laser638="Luxx-638"; //red
 
 ///////////////////////   KONFIGURACJA:
 
-ile_prawa =2;
-ile_lewa =2;
+//tiles
+ile_prawa =12;
+ile_lewa =8;
 ile=ile_prawa+ile_lewa;
 
+//laser
 laser = laser561; //do wyboru: laser488, laser561, laser638
-power=20; //laser power in mW here
+power=40; //laser power in mW here
 
 //////////////////////     KONIEC
 
@@ -125,11 +127,11 @@ if (npos==ile) {
 }
 
 // -1 --> attach to all planes along given dimension
-
 mm.acquisitions().attachRunnable(0, -1, 0, 0, waiting); // f, p, c, s 
 mm.acquisitions().attachRunnable(0, 0, 0, 0, starting); // f, p, c, s 
 mm.acquisitions().attachRunnable(0, ile_prawa, 0, 0, change_shutter); // f, p, c, s 
 
+//run
 mm.acquisitions().runAcquisition();
 
 //turn off laser and display message
