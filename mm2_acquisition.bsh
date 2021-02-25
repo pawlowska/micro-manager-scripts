@@ -14,8 +14,8 @@ laser638="Luxx-638"; //red
 ///////////////////////   KONFIGURACJA:
 
 //tiles
-ile_prawa =12;
-ile_lewa =8;
+ile_prawa =6;
+ile_lewa =6;
 ile=ile_prawa+ile_lewa;
 
 //laser
@@ -34,7 +34,7 @@ class LaserFunctions {
 		i_power=29;
 		i_status=21;
 		mmc.setProperty(laser, properties.get(i_status), "On");
-		mmc.sleep(3000);
+		mmc.sleep(2000);
 		
 	} else {
 		i_power=9;
@@ -43,7 +43,8 @@ class LaserFunctions {
 	};
 	mmc.setProperty(laser, properties.get(i_power), power);
 	status = mmc.getProperty(laser, properties.get(i_status));
-	print("laser status is "+status);
+	get_power = mmc.getProperty(laser, properties.get(i_power));
+	print("Laser status is "+status+" power "+get_power);
 };
 
 
@@ -53,7 +54,7 @@ class LaserFunctions {
 		if (laser==laser561) {i_status=21;}
 		else {i_status=5;};
 		mmc.setProperty(laser, properties.get(i_status), "Off");		
-		print("laser status "+mmc.getProperty(laser, properties.get(i_status)));
+		print("laserOff executed, laser status is: "+mmc.getProperty(laser, properties.get(i_status)));
 	}
 }
 
