@@ -14,38 +14,37 @@ laser638="Luxx-638"; //red
 ///////////////////////   KONFIGURACJA:
 
 //tiles
-ile_prawa =6;
-ile_lewa =6;
+ile_prawa =4;
+ile_lewa =8;
 ile=ile_prawa+ile_lewa;
 
 //laser
 laser = laser561; //do wyboru: laser488, laser561, laser638
-power=40; //laser power in mW here
+//power=40; //laser power in mW here
 
 //////////////////////     KONIEC
 
 class LaserFunctions {
 	public void laserOn(laser, power) {
-	print("Attempting to start "+laser);
-	StrVector properties = mmc.getDevicePropertyNames(laser);
-	i_power=-1;
-	i_status=-1;
-	if (laser==laser561) {
-		i_power=29;
-		i_status=21;
-		mmc.setProperty(laser, properties.get(i_status), "On");
-		mmc.sleep(2000);
-		
-	} else {
-		i_power=9;
-		i_status=5;
-		mmc.setProperty(laser, properties.get(i_status), "On");
+		print("Attempting to start "+laser);
+		StrVector properties = mmc.getDevicePropertyNames(laser);
+		i_power=-1;
+		i_status=-1;
+		if (laser==laser561) {
+			i_power=29;
+			i_status=21;
+			mmc.setProperty(laser, properties.get(i_status), "On");
+			mmc.sleep(2000);
+		} else {
+			i_power=9;
+			i_status=5;
+			mmc.setProperty(laser, properties.get(i_status), "On");
+		};
+		//mmc.setProperty(laser, properties.get(i_power), power);
+		status = mmc.getProperty(laser, properties.get(i_status));
+		get_power = mmc.getProperty(laser, properties.get(i_power));
+		print("Laser status is: "+status+", power: "+get_power);
 	};
-	mmc.setProperty(laser, properties.get(i_power), power);
-	status = mmc.getProperty(laser, properties.get(i_status));
-	get_power = mmc.getProperty(laser, properties.get(i_power));
-	print("Laser status is "+status+" power "+get_power);
-};
 
 
 	public void laserOff() {
@@ -64,7 +63,7 @@ starting = new Runnable() {
  */
 	 public void run() {
 	 		GenericDialog dlg = new GenericDialog("Manual Acquisition", null);
-			dlg.addMessage("Chosen laser: "+laser+". Did you change the filter? What about z?");
+			dlg.addMessage("Chosen laser: "+laser+". Did you change the filter and checked focus?");
 			dlg.showDialog();
 			if (dlg.wasCanceled()) {
 				print("Aborting acquisition. Change the filter and restart.");
@@ -83,6 +82,9 @@ starting = new Runnable() {
 				mmc.waitForDevice("ShutterD_LEFT");
 				print("Opening LEFT shutter");
       	}
+
+      	z=mmc.getPosition(zStage);
+			print(z);
 	 }
 };
 
@@ -104,16 +106,20 @@ waiting = new Runnable() {
 };
 
 /////////////////////////////////////////////////////////////////////
+zStage = mmc.getFocusDevice();
+R=mmc.getROI();
 
-//mm.acquisitions().getROI;
+print(R);
+//print(R.width);
+
 PositionList pl = mm.positions().getPositionList() ;
+
 npos=pl.getNumberOfPositions();
 if (npos==ile) {
 	print("Number of tiles: "+npos);
 } else if (ile==1) {
-	print("Single stack");
+	print("Single stack, using current XY position");
 	xyStage = mmc.getXYStageDevice();
-	zStage = mmc.getFocusDevice();
 	x=mmc.getXPosition(xyStage);
 	y=mmc.getYPosition(xyStage);
 	z=mmc.getPosition(zStage);
@@ -138,7 +144,13 @@ mm.acquisitions().runAcquisition();
 //turn off laser and display message
 new LaserFunctions().laserOff();
 
-MultiStagePosition msp=pl.getPosition(0);
+pth_file=mm.acquisitions().getAcquisitionSettings().root()+"\\"+mm.acquisitions().getAcquisitionSettings().prefix();
+print(pth_file);
+//pth_file=mm.acquisitions().getAcquisitionSettings().root()+"\\"+mm.acquisitions().getAcquisitionSettings().prefix()+"_positions.txt";
+//pl.save(pth_file);
+//print("Positions saved to: "+pth_file);
+
+MultiStagePosition msp=pl.getPosition(ile_prawa+1);
 print("Going back to "+msp.getLabel());
 MultiStagePosition.goToPosition(msp, mmc);
 
